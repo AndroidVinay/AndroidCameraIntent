@@ -71,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
 		String imageFileName = "IMAGE_" + timeStamp + "_";
 		File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment
 				.DIRECTORY_PICTURES);
-
-
 		File image = File.createTempFile(imageFileName, ".jpg", storageDirectory);
 		mImageFileLocation = image.getAbsolutePath();
 
