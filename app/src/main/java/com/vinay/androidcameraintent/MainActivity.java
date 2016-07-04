@@ -40,6 +40,12 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		finish();
+	}
+
+	@Override
 	protected void onResume() {
 		super.onResume();
 		mPhotoCapturedImageView = (ImageView) findViewById(R.id.capturePhotoImageView);
@@ -48,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	public void openCamera(View view) {
-//		Toast.makeText(MainActivity.this, "camera button pressed", Toast.LENGTH_SHORT).show();
 		Intent callCameraApplicationIntent = new Intent();
 		callCameraApplicationIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
 		File photofile = null;
@@ -65,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
 
 	public void openGallery(View view) {
 
-		Toast.makeText(MainActivity.this, " show gallery ", Toast.LENGTH_SHORT).show();
 		Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media
 				.EXTERNAL_CONTENT_URI);
 		startActivityForResult(intent, ACTIVITY_START_GALLARY);
@@ -74,9 +78,8 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == ACTIVITY_START_CAMERA_APP && resultCode == RESULT_OK) {
 
+		if (requestCode == ACTIVITY_START_CAMERA_APP && resultCode == RESULT_OK) {
 			rotateImage(setReduceImageSizeFromGallery(mImageFileLocation),mImageFileLocation);
 		}
 		if (requestCode == ACTIVITY_START_GALLARY && resultCode == RESULT_OK) {
@@ -122,39 +125,12 @@ public class MainActivity extends AppCompatActivity {
 		bmOptions.inSampleSize = scaleFactor;
 		bmOptions.inJustDecodeBounds = false;
 
-
-//		Bitmap photoReduceSizeBitmap = BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
-//		mPhotoCapturedImageView.setImageBitmap(photoReduceSizeBitmap);
-
 		return BitmapFactory.decodeFile(location, bmOptions);
 	}
 
 
-//	private Bitmap setReduceImageSize() {
-//		mPhotoCapturedImageView = (ImageView) findViewById(R.id.capturePhotoImageView);
-//		int targetImageViewWidth = mPhotoCapturedImageView.getWidth();
-//		int targetImageViewHeight = mPhotoCapturedImageView.getHeight();
-//
-//		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-//		bmOptions.inJustDecodeBounds = true;
-//		BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
-//		int cameraImageWidth = bmOptions.outWidth;
-//		int cameraImageHeight = bmOptions.outHeight;
-//
-//		int scaleFactor = Math.min(cameraImageWidth / targetImageViewWidth, cameraImageHeight /
-//				targetImageViewHeight);
-//		bmOptions.inSampleSize = scaleFactor;
-//		bmOptions.inJustDecodeBounds = false;
-//
-////		Bitmap photoReduceSizeBitmap = BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
-////		mPhotoCapturedImageView.setImageBitmap(photoReduceSizeBitmap);
-//
-//		return BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
-//	}
-
 	private void rotateImage(Bitmap bitmap,String location) {
 		ExifInterface exifInterface = null;
-
 		try {
 			exifInterface = new ExifInterface(location);
 		} catch (IOException e) {
@@ -189,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 }
 
-
 class ImageViewGetterSetter {
 
 	ImageView imageView;
@@ -205,11 +180,3 @@ class ImageViewGetterSetter {
 		this.imageView = imageView;
 	}
 }
-
-//			Toast.makeText(MainActivity.this, "Picture Taken Successfully", Toast.LENGTH_SHORT)
-// .show();
-//			Bundle extras = data.getExtras();
-//			Bitmap photoCapturedBitmap = (Bitmap) extras.get("data");
-//			mPhotoCapturedImageView.setImageBitmap(photoCapturedBitmap);
-//			Bitmap photoCapturedBitmap = BitmapFactory.decodeFile(mImageFileLocation);
-//			mPhotoCapturedImageView.setImageBitmap(photoCapturedBitmap);
