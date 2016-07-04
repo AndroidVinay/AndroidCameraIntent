@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 //		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == ACTIVITY_START_CAMERA_APP && resultCode == RESULT_OK) {
 
-			rotateImage(setReduceImageSizeFromGallery(mImageFileLocation));
+			rotateImage(setReduceImageSizeFromGallery(mImageFileLocation),mImageFileLocation);
 		}
 		if (requestCode == ACTIVITY_START_GALLARY && resultCode == RESULT_OK) {
 			Uri URI = data.getData();
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
 			Bitmap photoCapturedBitmap = BitmapFactory.decodeFile(ImageDecode);
 			cursor.close();
-			rotateImage(setReduceImageSizeFromGallery(ImageDecode));
+			rotateImage(setReduceImageSizeFromGallery(ImageDecode),ImageDecode);
 		}
 	}
 
@@ -152,11 +152,11 @@ public class MainActivity extends AppCompatActivity {
 //		return BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
 //	}
 
-	private void rotateImage(Bitmap bitmap) {
+	private void rotateImage(Bitmap bitmap,String location) {
 		ExifInterface exifInterface = null;
 
 		try {
-			exifInterface = new ExifInterface(mImageFileLocation);
+			exifInterface = new ExifInterface(location);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
