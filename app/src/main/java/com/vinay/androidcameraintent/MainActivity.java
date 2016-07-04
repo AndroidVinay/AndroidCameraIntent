@@ -24,9 +24,9 @@ public class MainActivity extends AppCompatActivity {
 
 	private static final int ACTIVITY_START_CAMERA_APP = 0;
 	private static final int ACTIVITY_START_GALLARY = 1;
-	private ImageView mPhotoCapturedImageView;
-	private String mImageFileLocation = "";
-	String ImageDecode;
+	public ImageView mPhotoCapturedImageView;
+	String mImageFileLocation;
+	ImageViewGetterSetter imageViewGetterSetter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,18 +34,29 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		mPhotoCapturedImageView = (ImageView) findViewById(R.id.capturePhotoImageView);
+		imageViewGetterSetter = new ImageViewGetterSetter();
+		imageViewGetterSetter.setImageView(mPhotoCapturedImageView);
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mPhotoCapturedImageView = (ImageView) findViewById(R.id.capturePhotoImageView);
+		ImageViewGetterSetter imageViewGetterSetter = new ImageViewGetterSetter();
+		imageViewGetterSetter.setImageView(mPhotoCapturedImageView);
 	}
 
 	public void openCamera(View view) {
 //		Toast.makeText(MainActivity.this, "camera button pressed", Toast.LENGTH_SHORT).show();
 		Intent callCameraApplicationIntent = new Intent();
 		callCameraApplicationIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-
 		File photofile = null;
 		try {
 			photofile = createImageFile();
 		} catch (IOException e) {
 			e.printStackTrace();
+			Toast.makeText(MainActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 
 		callCameraApplicationIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photofile));
@@ -53,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	public void openGallery(View view) {
+
 		Toast.makeText(MainActivity.this, " show gallery ", Toast.LENGTH_SHORT).show();
 		Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media
 				.EXTERNAL_CONTENT_URI);
@@ -65,16 +77,8 @@ public class MainActivity extends AppCompatActivity {
 //		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == ACTIVITY_START_CAMERA_APP && resultCode == RESULT_OK) {
 
-//			Toast.makeText(MainActivity.this, "Picture Taken Successfully", Toast.LENGTH_SHORT)
-// .show();
-//			Bundle extras = data.getExtras();
-//			Bitmap photoCapturedBitmap = (Bitmap) extras.get("data");
-//			mPhotoCapturedImageView.setImageBitmap(photoCapturedBitmap);
-//			Bitmap photoCapturedBitmap = BitmapFactory.decodeFile(mImageFileLocation);
-//			mPhotoCapturedImageView.setImageBitmap(photoCapturedBitmap);
-			rotateImage(setReduceImageSize());
+			rotateImage(setReduceImageSizeFromGallery(mImageFileLocation));
 		}
-
 		if (requestCode == ACTIVITY_START_GALLARY && resultCode == RESULT_OK) {
 			Uri URI = data.getData();
 			String[] FILE = {MediaStore.Images.Media.DATA};
@@ -82,15 +86,15 @@ public class MainActivity extends AppCompatActivity {
 					FILE, null, null, null);
 			cursor.moveToFirst();
 			int columnIndex = cursor.getColumnIndex(FILE[0]);
-			ImageDecode = cursor.getString(columnIndex);
+			String ImageDecode = cursor.getString(columnIndex);
+
 			Bitmap photoCapturedBitmap = BitmapFactory.decodeFile(ImageDecode);
 			cursor.close();
-			rotateImage(setReduceImageSizeFromGallery());
+			rotateImage(setReduceImageSizeFromGallery(ImageDecode));
 		}
 	}
 
 	File createImageFile() throws IOException {
-
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = "IMAGE_" + timeStamp + "_";
 		File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment
@@ -101,51 +105,52 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 
+	private Bitmap setReduceImageSizeFromGallery(String location) {
 
-	private Bitmap setReduceImageSizeFromGallery() {
-		mPhotoCapturedImageView = (ImageView) findViewById(R.id.capturePhotoImageView);
-		int targetImageViewWidth = mPhotoCapturedImageView.getWidth();
-		int targetImageViewHeight = mPhotoCapturedImageView.getHeight();
+		int targetImageViewWidth = imageViewGetterSetter.getImageView().getWidth();
+		int targetImageViewHeight = imageViewGetterSetter.getImageView().getHeight();
 
 		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
 		bmOptions.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(ImageDecode, bmOptions);
+		BitmapFactory.decodeFile(location, bmOptions);
 		int cameraImageWidth = bmOptions.outWidth;
 		int cameraImageHeight = bmOptions.outHeight;
+
 
 		int scaleFactor = Math.min(cameraImageWidth / targetImageViewWidth, cameraImageHeight /
 				targetImageViewHeight);
 		bmOptions.inSampleSize = scaleFactor;
 		bmOptions.inJustDecodeBounds = false;
 
-//		Bitmap photoReduceSizeBitmap = BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
-//		mPhotoCapturedImageView.setImageBitmap(photoReduceSizeBitmap);
-
-		return BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
-	}
-
-
-	private Bitmap setReduceImageSize() {
-		mPhotoCapturedImageView = (ImageView) findViewById(R.id.capturePhotoImageView);
-		int targetImageViewWidth = mPhotoCapturedImageView.getWidth();
-		int targetImageViewHeight = mPhotoCapturedImageView.getHeight();
-
-		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-		bmOptions.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
-		int cameraImageWidth = bmOptions.outWidth;
-		int cameraImageHeight = bmOptions.outHeight;
-
-		int scaleFactor = Math.min(cameraImageWidth / targetImageViewWidth, cameraImageHeight /
-				targetImageViewHeight);
-		bmOptions.inSampleSize = scaleFactor;
-		bmOptions.inJustDecodeBounds = false;
 
 //		Bitmap photoReduceSizeBitmap = BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
 //		mPhotoCapturedImageView.setImageBitmap(photoReduceSizeBitmap);
 
-		return BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
+		return BitmapFactory.decodeFile(location, bmOptions);
 	}
+
+
+//	private Bitmap setReduceImageSize() {
+//		mPhotoCapturedImageView = (ImageView) findViewById(R.id.capturePhotoImageView);
+//		int targetImageViewWidth = mPhotoCapturedImageView.getWidth();
+//		int targetImageViewHeight = mPhotoCapturedImageView.getHeight();
+//
+//		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+//		bmOptions.inJustDecodeBounds = true;
+//		BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
+//		int cameraImageWidth = bmOptions.outWidth;
+//		int cameraImageHeight = bmOptions.outHeight;
+//
+//		int scaleFactor = Math.min(cameraImageWidth / targetImageViewWidth, cameraImageHeight /
+//				targetImageViewHeight);
+//		bmOptions.inSampleSize = scaleFactor;
+//		bmOptions.inJustDecodeBounds = false;
+//
+////		Bitmap photoReduceSizeBitmap = BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
+////		mPhotoCapturedImageView.setImageBitmap(photoReduceSizeBitmap);
+//
+//		return BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
+//	}
 
 	private void rotateImage(Bitmap bitmap) {
 		ExifInterface exifInterface = null;
@@ -165,10 +170,46 @@ public class MainActivity extends AppCompatActivity {
 			case ExifInterface.ORIENTATION_ROTATE_180:
 				matrix.setRotate(180);
 				break;
+			case ExifInterface.ORIENTATION_ROTATE_270:
+				matrix.setRotate(270);
+
+			case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+				matrix.preScale(true ? -1 : 1, false ? -1 : 1);
+//				return flip(bitmap, true, false);
+
+			case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+				matrix.preScale(false ? -1 : 1, true ? -1 : 1);
+
 			default:
+				break;
 		}
 		Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap
 				.getHeight(), matrix, true);
 		mPhotoCapturedImageView.setImageBitmap(rotatedBitmap);
 	}
 }
+
+
+class ImageViewGetterSetter {
+
+	ImageView imageView;
+
+	public ImageViewGetterSetter() {
+	}
+
+	public ImageView getImageView() {
+		return imageView;
+	}
+
+	public void setImageView(ImageView imageView) {
+		this.imageView = imageView;
+	}
+}
+
+//			Toast.makeText(MainActivity.this, "Picture Taken Successfully", Toast.LENGTH_SHORT)
+// .show();
+//			Bundle extras = data.getExtras();
+//			Bitmap photoCapturedBitmap = (Bitmap) extras.get("data");
+//			mPhotoCapturedImageView.setImageBitmap(photoCapturedBitmap);
+//			Bitmap photoCapturedBitmap = BitmapFactory.decodeFile(mImageFileLocation);
+//			mPhotoCapturedImageView.setImageBitmap(photoCapturedBitmap);
